@@ -24,3 +24,5 @@ The data used in this series of workflows are RNA-seq reads of the archea *Sulfo
 The objective of this experiment, data and analysis is known the genes that are afected for the Lrs 14-like gene expression. Moreover, know if the change of culture medium have a influence in the genectic expression. 
 
 #### **meta**. Inside this directory, we have the file `table_of_id_culture.csv`with the ids of the culture medium. 
+
+##### `Resumen.md` contains a summary in spanish of the analysis realized in this repository. We can access to this file with this [link] (https://github.com/KarenJimenez16/Proyecto_Bionf2020/blob/master/Resumen.md)
