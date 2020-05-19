@@ -8,7 +8,7 @@ This repository contains scripts in bash command line and R for a general visual
 
 `1. data_view_and_fastqc.sh` let us see a general visualization of the raw data and make a quality analysis using fastqc in bash command line.
 
-`2. Figure in R.rmd` make a figure of differential expression for culture medium in *S. acidocaldarius*. To make this figure, is necessary a large number of steps in bash command line, but here we´re gonna use the final data result of the workflow in bash. For more information of workflow in bash, you can go to this [link] (https://github.com/u-genoma/BioinfinvRepro/blob/master/Unidad7/Tutorial_RNAseq.md).
+`2. Figure in R.rmd` make a figure of differential expression for culture medium in *S. acidocaldarius*. To make this figure, is necessary a large number of steps in bash command line, but here we´re gonna use the final data result of the workflow in bash. For more information of workflow in bash, you can go to this [link](https://github.com/u-genoma/BioinfinvRepro/blob/master/Unidad7/Tutorial_RNAseq.md).
 
 `3. Figure-in-R.html` show us a report of the steps used in `Figure in R.rmd` for make the figure of differential exprewssion for culture medium in *S. acidocaldarius*.
 
@@ -25,4 +25,4 @@ The objective of this experiment, data and analysis is known the genes that are 
 
 #### **meta**. Inside this directory, we have the file `table_of_id_culture.csv`with the ids of the culture medium. 
 
-##### `Resumen.md` contains a summary in spanish of the analysis realized in this repository. We can access to this file with this [link] (https://github.com/KarenJimenez16/Proyecto_Bionf2020/blob/master/Resumen.md)
+##### `Resumen.md` contains a summary in spanish of the analysis realized in this repository. We can access to this file with this [link](https://github.com/KarenJimenez16/Proyecto_Bionf2020/blob/master/Resumen.md)
