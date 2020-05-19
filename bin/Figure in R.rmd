@@ -1,0 +1,199 @@
+---
+title: "Differential expression in *Sulfolobus acidocaldarius*"
+author: "Karen Yoselin Jiménez Cedillo"
+date: "15/5/2020"
+output: html_document
+---
+This script make a figure of the differential expression in *Sulfolobus acidocaldarius* for to factors: Treatment (growing in a plantonic medium and in biofilm) and mutation (wild type strain and mutation in the gene Lrs 14-like strain).
+
+To make this figure, is necessary a large number of steps in bash command line, but here were gonna use the final data result of the workflow in bash. For more information of workflow in bash, you can go to this [link] (https://github.com/u-genoma/BioinfinvRepro/blob/master/Unidad7/Tutorial_RNAseq.md).
+
+##### Preliminary steps 
+
+Define directories of data entry and where the outputs are going to be saved. Is importat run and set the working directory of this Rmarkdown in the bin directory. 
+
+```{r eval=TRUE}
+input_dir  <- file.path("..","data","count")
+output_pseudo <- file.path("..","data","diff_expr", "pseudocounts") 
+output_histogram <- file.path("..","data","diff_expr", "histograms") 
+output_pvalue_fdr <- file.path("..","data","diff_expr", "pvalue_fdr") 
+output_table <- file.path("..","data","diff_expr", "tables")
+```
+
+```{r eval = TRUE, echo = FALSE}
+if(!file.exists(input_dir)){
+  stop("Data directory doesn't exist: ", input_dir)
+}
+if(!file.exists(output_pseudo)){
+  dir.create(output_pseudo, mode = "0755", recursive=T)
+}
+if(!file.exists(output_histogram)){
+  dir.create(output_histogram, mode = "0755", recursive=T)
+}
+if(!file.exists(output_pvalue_fdr)){
+  dir.create(output_pvalue_fdr, mode = "0755", recursive=T)
+}
+if(!file.exists(output_table)){
+  dir.create(output_table, mode = "0755", recursive=T)
+}
+```
+
+
+##### Activate the library ‘edgeR’ 
+We need the `edgeR` library for make the test of differential expression.  
+
+```{r eval=TRUE}
+library(edgeR)
+```
+
+##### Upload and process input files
+
+```{r eval=TRUE}
+wild_p <- read.delim(file=file.path(input_dir, "MW001_P.count"), sep="\t", header = F, check=F); colnames(wild_p) <- c("Gen_ID", "Count")
+
+wild_b <- read.delim(file=file.path(input_dir, "MW001_B3.count"), sep="\t", header = F, check=F); colnames(wild_b) <- c("Gen_ID", "Count")
+
+mut_p <- read.delim(file=file.path(input_dir, "0446_P.count"), sep="\t", header = F, check=F); colnames(mut_p) <- c("Gen_ID", "Count")
+
+mut_b <- read.delim(file=file.path(input_dir, "0446_B3.count"), sep="\t", header = F, check=F); colnames(mut_b) <- c("Gen_ID", "Count")
+```
+
+##### Join the data in a unique data set 
+
+```{r eval=TRUE}
+rawcounts <- data.frame(wild_p$Gen_ID, WildType_P = wild_p$Count, WildType_B = wild_b$Count, Mutant_P = mut_p$Count, Mutant_B = mut_b$Count, row.names = 1)
+```
+
+##### Rpkm calculation
+
+```{r eval=TRUE}
+rpkm <- cpm(rawcounts)
+```
+
+ 
+#### Remove of data and gene filter 
+
+Rows that were not going to be used were removed and genes with a value of RPKM < 1 were removed.  
+
+```{r eval=TRUE}
+to_remove <- rownames(rawcounts) %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique")
+keep <- rowSums(rpkm > 1) >= 3 & !to_remove
+rawcounts <- rawcounts[keep,]
+```
+
+#### Differential expression for culture medium and genotype 
+##### Clustering of samples for culture medium 
+
+We create a vector that clustering the samples according the culture medium.
+
+```{r eval=TRUE}
+group_culture <- c("planctonic","biofilm","planctonic","biofilm")
+```
+
+##### Creation of a DGE object
+
+We create a DGE object for make the calculations necessary for identify differential expressed genes.
+
+```{r eval=TRUE}
+dge_culture <- DGEList(counts = rawcounts, group = group_culture)
+```
+
+##### Normalization factor calculation 
+
+We calculate a normalization factor for normalizate the counts values according the size of each library. 
+
+```{r eval=TRUE}
+dge_culture <- calcNormFactors(dge_culture)
+```
+
+##### Dispersion values estimation
+
+We estimate two dispersion values, one for each gene and one for each library.
+
+```{r eval=TRUE}
+dge_culture <- estimateCommonDisp(dge_culture)
+dge_culture <- estimateTagwiseDisp(dge_culture)
+```
+
+##### Differential expresion test 
+
+We realize a "exact test" for make the differential expression test, assuming that counts are distributed in a negative binomial distribution. 
+
+```{r eval=TRUE}
+de_culture <- exactTest(dge_culture, pair = c("planctonic","biofilm"))
+```
+
+##### Summary result table 
+
+```{r eval=TRUE}
+results_culture <- topTags(de_culture, n = nrow(dge_culture)) 
+results_culture <- results_culture$table
+```
+
+##### Identification of differential expression genes 
+
+```{r eval=TRUE}
+ids_culture <- rownames(results_culture[results_culture$FDR < 0.1,])
+```
+
+#### Differential expression for genotypes 
+
+##### Creation of counts set 
+
+We create a counts set that not include the differential expressed genes for culture medium. 
+
+```{r eval=TRUE}
+rawcounts_genotype <- rawcounts[!rownames(rawcounts) %in% ids_culture,]
+```
+
+We use the same data management for differential expression for culture medium, now for genotypes data.
+
+```{r eval=TRUE}
+group_genotype <- c("wildtype","wildtype","mutant","mutant")
+dge_genotype <- DGEList(counts = rawcounts_genotype, group = group_genotype)
+dge_genotype <- calcNormFactors(dge_genotype)
+dge_genotype <- estimateCommonDisp(dge_genotype)
+dge_genotype <- estimateTagwiseDisp(dge_genotype)
+de_genotype <- exactTest(dge_genotype, pair = c("wildtype","mutant"))
+results_genotype <- topTags(de_genotype, n = nrow(de_genotype))
+results_genotype <- results_genotype$table
+ids_genotype <- rownames(results_genotype[results_genotype$FDR < 0.1,])
+```
+
+#### Results generation 
+
+##### Definition of boolean vectors 
+
+We create boolean vectors for mark genes with differential expression of the rest of genes.
+
+```{r eval=TRUE}
+de_genes_culture  <- rownames(rawcounts) %in% ids_culture
+de_genes_genotype <- rownames(rawcounts) %in% ids_genotype
+```
+
+##### Pseudocounts obtention and logarithmic scale transformation 
+
+```{r eval=TRUE}
+pseudocounts <- data.frame(rownames(rawcounts), WildType_P = log10(dge_culture$pseudo.counts[,1]), WildType_B = log10(dge_culture$pseudo.counts[,2]), Mutant_P =  log10(dge_culture$pseudo.counts[,3]), Mutant_B = log10(dge_culture$pseudo.counts[,4]), DE_C = de_genes_culture, DE_G = de_genes_genotype, row.names = 1)
+```
+
+##### Pseudocounts graphication 
+
+We graph the pseudocounts for each gene, using a different color for differetial expressed genes.   
+
+```{r eval=TRUE, echo=TRUE}
+#Medio de Cultivo
+par(mfrow = c(1,2))
+plot(pseudocounts$WildType_P, pseudocounts$WildType_B, col = ifelse(pseudocounts$DE_C, "red", "blue"), main = "Wild Type", xlab = "Planctonic", ylab = "Biofilm", cex.main = 1.3, cex.lab = 1.3, cex.axis = 1.2, las = 01)
+abline(lsfit(pseudocounts$WildType_P, pseudocounts$WildType_B), col = "black")
+plot(pseudocounts$Mutant_P, pseudocounts$Mutant_B, col = ifelse(pseudocounts$DE_C, "red", "blue"), main = "Mutant", xlab = "Planctonic", ylab =  "Biofilm", cex.main = 1.3, cex.lab = 1.3, cex.axis = 1.2, las = 01)
+abline(lsfit(pseudocounts$Mutant_P, pseudocounts$Mutant_B), col = "black")
+```
+
+##### **Figure 1.** Expression values for culture medium 
+
+
+
+
+ 
+
