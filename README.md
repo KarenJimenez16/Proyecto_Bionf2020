@@ -4,7 +4,7 @@ This repository contains scripts in bash command line and R for a general visual
 
 ### Directories and files inside 
 
-#### *bin*. Insides this directory are include the scripts for make analysis or figures with the data.  
+#### **bin**. Insides this directory are include the scripts for make analysis or figures with the data.  
 
 `1. data_view_and_fastqc.sh` let us see a general visualization of the raw data and make a quality analysis using fastqc in bash command line.
 
@@ -16,10 +16,10 @@ This repository contains scripts in bash command line and R for a general visual
 
 The data used in this series of workflows are RNA-seq reads of the archea *Sulfolobus acidocaldarius*. We have four libraries of reads, analizing two factors: genotype and culture medium. For genotype, we have a control strain and a mutant strain with a knockdown mutation in the Lrs14-like gene. This gene have a relationship with the grown in biofilms, so we studying it with the objective of know if it have a relationship depent or independent with other genes. For culture medium, the archea (both genotypes) was grown in a plantonic medium and biofilm. In summary, the four libraries correspond to the following experimental groups: 
 
-`Wildtype (or control strain) in plantonic medium, named "WildType_P"` 
-`Wildtype in biofilm, named "Wildtype_B"`
-`Mutant in plantonic medium, named "Mutant_P"`
-`Mutant in biofilm, named "Mutant_B"`
+*`Wildtype (or control strain) in plantonic medium, named "WildType_P"` 
+*`Wildtype in biofilm, named "Wildtype_B"`
+*`Mutant in plantonic medium, named "Mutant_P"`
+*`Mutant in biofilm, named "Mutant_B"`
 
 The objective of this experiment, data and analysis is known the genes that are afected for the Lrs 14-like gene expression. Moreover, know if the change of culture medium have a influence in the genectic expression. 
 
